@@ -7,6 +7,7 @@ namespace AMI_View
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            // Frontend
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
