@@ -1,0 +1,160 @@
+﻿@{
+    ViewData["Title"] = "My Meter Readings";
+    Layout = "~/Views/Shared/_Layout_Consumer.cshtml";
+}
+
+<div class="container my-5">
+    <h3 class="mb-4 text-primary fw-bold">
+        📊 My Energy Readings
+    </h3>
+
+    <div id="readingContainer"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+    // 🔹 Decode JWT
+    function parseJwt(token) {
+        try {
+            return JSON.parse(atob(token.split('.')[1]));
+        } catch (e) {
+            return null;
+        }
+    }
+
+    $(document).ready(async function () {
+
+        const token = localStorage.getItem("jwtToken");
+
+        if (!token) {
+            window.location.href = "/Auth/ConsumerLogin";
+            return;
+        }
+
+        const decoded = parseJwt(token);
+
+        // 🔥 FIXED: Correct field is "nameid"
+        const consumerId = decoded?.nameid;
+
+        if (!consumerId) {
+            alert("Invalid login session.");
+            window.location.href = "/Auth/ConsumerLogin";
+            return;
+        }
+
+        try {
+            const response = await $.ajax({
+                url: `https://localhost:7071/api/Reading/consumer/${consumerId}`,
+                type: "GET",
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            renderReadingData(response);
+
+        } catch (err) {
+            console.error(err);
+            $("#readingContainer").html(`
+                <div class="alert alert-danger">❌ Failed to load readings.</div>
+            `);
+        }
+    });
+
+
+    // 🔹 Render UI
+    function renderReadingData(data) {
+
+        let html = `
+            <div class="mb-4">
+                <h5 class="fw-bold">Consumer: <span class="text-success">${data.consumerName}</span></h5>
+                <h6 class="text-muted">Consumer ID: ${data.consumerId}</h6>
+            </div>
+        `;
+
+        data.meters.forEach((meter, index) => {
+
+            html += `
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">🔌 Meter: ${meter.meterSerialNo}</h5>
+                    </div>
+                    <div class="card-body">
+
+                        <h6 class="fw-bold text-secondary">📅 Daily Readings</h6>
+                        ${renderDailyTable(meter.dailyReadings)}
+
+                        <hr/>
+
+                        <h6 class="fw-bold text-secondary">📆 Monthly Totals</h6>
+                        ${renderMonthlyTable(meter.monthlyTotals)}
+
+                    </div>
+                </div>
+            `;
+
+        });
+
+        $("#readingContainer").html(html);
+    }
+
+
+    // 🔹 Build Daily Table
+    function renderDailyTable(readings) {
+
+        if (!readings || readings.length === 0)
+            return `<p class="text-muted">No daily readings available.</p>`;
+
+        let rows = readings.map(r => `
+            <tr>
+                <td>${new Date(r.readingDate).toLocaleDateString()}</td>
+                <td>${r.readingKwh} kWh</td>
+            </tr>
+        `).join("");
+
+        return `
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Units (kWh)</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        `;
+    }
+
+
+    // 🔹 Build Monthly Table
+    function renderMonthlyTable(months) {
+
+        if (!months || months.length === 0)
+            return `<p class="text-muted">No monthly totals available.</p>`;
+
+        let rows = months.map(m => `
+            <tr>
+                <td>${m.month}-${m.year}</td>
+                <td>${m.totalUnits} kWh</td>
+            </tr>
+        `).join("");
+
+        return `
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Month</th>
+                            <th>Total Units (kWh)</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        `;
+    }
+
+</script>

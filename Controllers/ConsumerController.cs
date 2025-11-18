@@ -32,5 +32,15 @@ namespace AMI_View.Controllers
         {
             return View();
         }
+
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        public IActionResult Readings()
+        {
+            return View();
+        }
     }
 }

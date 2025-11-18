@@ -183,6 +183,29 @@
                 error: function () {
                     $("#meterTableContainer").html('<p class="text-danger">Error loading meters.</p>');
                 }
+
+    //                 error: function (xhr) {
+    //     let errorText = xhr.responseText || "";
+    //     const msg = errorText.toLowerCase();
+
+    //     if (msg.includes("duplicate") && msg.includes("meter")) {
+    //         alert("❌ Meter Serial Number already exists.");
+    //         return;
+    //     }
+
+    //     if (msg.includes("duplicate") && msg.includes("ip")) {
+    //         alert("❌ IP Address already exists.");
+    //         return;
+    //     }
+
+    //     if (msg.includes("delete") && msg.includes("conflicted")) {
+    //         alert("❌ Cannot delete or update this meter because it is linked to other records.");
+    //         return;
+    //     }
+
+    //     alert("❌ Error saving meter. Please try again.");
+    // }
+
             });
         }
 
@@ -418,9 +441,54 @@
                     bootstrap.Modal.getInstance(document.getElementById("meterModal")).hide();
                     loadMeters();
                 },
-                error: function (xhr) {
-                    alert("Error saving meter: " + xhr.responseText);
-                }
+                // error: function (xhr) {
+                //     alert("Error saving meter: " + xhr.responseText);
+                // }
+
+        error: function (xhr) {
+        let text = xhr.responseText.toLowerCase();
+
+        console.log("ERROR:", text);
+
+        // --- IP Address Duplicate ---
+        if (text.includes("ix_meter_ipaddress") ||
+            (text.includes("duplicate") && text.includes("192.168"))) {
+            alert("❌ IP Address already exists.");
+            return;
+        }
+
+        //--- Meter Serial Number Duplicate ---
+        // if (
+        //     text.includes("duplicate") && text.includes("serial")) {
+        //     alert("❌ Meter Serial Number already exists.");
+        //     return;
+        // }
+
+        // --- ICCID Duplicate ---
+        if (text.includes("uq__meter__8a69bc4c") ||
+            (text.includes("duplicate") && text.includes("iccid"))) {
+            alert("❌ ICCID already exists.");
+            return;
+        }
+
+        // --- IMSI Duplicate ---
+        if (text.includes("uq__meter__8df3a70e") ||
+            (text.includes("duplicate") && text.includes("imsi"))) {
+            alert("❌ IMSI already exists.");
+            return;
+        }
+
+        // --- Delete / Update Conflict ---
+        if (text.includes("delete") && text.includes("conflicted")) {
+            alert("❌ This meter cannot be updated or deleted because it is linked to other records.");
+            return;
+        }
+
+        // --- Fallback ---
+        alert("❌ Something went wrong while updating the meter.");
+    }
+
+
             });
         });
 

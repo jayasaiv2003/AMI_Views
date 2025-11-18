@@ -12,6 +12,9 @@ namespace AMI_View.Controllers
         {
             return View();
         }
-
+        public IActionResult Register()
+        {
+            return View();
+        }
     }
 }

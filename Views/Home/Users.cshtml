@@ -135,7 +135,7 @@
                             <td>${u.displayName}</td>
                             <td>${u.email}</td>
                             <td>${u.phone}</td>
-                            <td>${lastLogin}</td>
+                            <td>${lastLogin}</td>   //edited
                             <td>${statusBadge}</td>
                             <td class="text-center">
                                 <button class="btn btn-sm btn-outline-primary me-2 btn-edit" data-id="${u.userId}">
@@ -162,7 +162,7 @@
             displayName: $("#displayName").val(),
             email: $("#email").val(),
             phone: $("#phone").val(),
-            lastLogin: new Date().toISOString(), // current timestamp
+            //lastLogin: new Date().toISOString(), // current timestamp
             isActive: $("#isActive").val() === "true"
         };
 

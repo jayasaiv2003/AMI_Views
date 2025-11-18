@@ -175,6 +175,15 @@
             $("#pagination").html(buttons);
         }
 
+
+
+
+
+
+
+
+
+
         // Handle page click
         $(document).on("click", "#pagination .page-link", function (e) {
             e.preventDefault();
@@ -204,38 +213,85 @@
         });
 
         // Add Consumer
-        $("#btnAdd").click(function () {
-            const consumer = getFormData();
-            $.ajax({
-                url: `${API_BASE}/add`,
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(consumer),
-                success: function () {
-                    alert("✅ Consumer added successfully!");
-                    clearForm();
-                    loadConsumers();
-                },
-                error: () => alert("❌ Error adding consumer")
-            });
-        });
+       // Add Consumer
+$("#btnAdd").click(function () {
 
-        // Update Consumer
-        $("#btnUpdate").click(function () {
-            const consumer = getFormData();
-            $.ajax({
-                url: `${API_BASE}/update`,
-                type: "PUT",
-                contentType: "application/json",
-                data: JSON.stringify(consumer),
-                success: function () {
-                    alert("✅ Consumer updated successfully!");
-                    clearForm();
-                    loadConsumers();
-                },
-                error: () => alert("❌ Error updating consumer")
-            });
-        });
+    if (!validateForm(false)) return; // false → Add mode
+
+    const consumer = getFormData();
+    $.ajax({
+        url: `${API_BASE}/add`,
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(consumer),
+        success: function () {
+            alert("✅ Consumer added successfully!");
+            clearForm();
+            loadConsumers();
+        },
+        error: () => alert("❌ Error adding consumer")
+    });
+});
+
+// Update Consumer
+$("#btnUpdate").click(function () {
+
+    if (!validateForm(true)) return; // true → Update mode
+
+    const consumer = getFormData();
+    $.ajax({
+        url: `${API_BASE}/update`,
+        type: "PUT",
+        contentType: "application/json",
+        data: JSON.stringify(consumer),
+        success: function () {
+            alert("✅ Consumer updated successfully!");
+            clearForm();
+            loadConsumers();
+        },
+        error: () => alert("❌ Error updating consumer")
+    });
+});
+
+// =========================
+// VALIDATION FUNCTION
+// =========================
+function validateForm(isUpdate) {
+
+    const id = $("#consumerId").val().trim();
+    const name = $("#name").val().trim();
+    const phone = $("#phone").val().trim();
+    const email = $("#email").val().trim();
+    const address = $("#address").val().trim();
+
+    if (isUpdate && id === "") {
+        alert("⚠️ Consumer ID is required for update.");
+        return false;
+    }
+
+    if (name === "") {
+        alert("⚠️ Name cannot be empty.");
+        return false;
+    }
+
+    if (!/^\d{10}$/.test(phone)) {
+        alert("⚠️ Enter a valid 10-digit phone number.");
+        return false;
+    }
+
+    // if (email === "" || !/^\S+\S+\.\S+$/.test(email)) {
+    //     alert("⚠️ Enter a valid email address.");
+    //     return false;
+    // }
+
+    if (address === "") {
+        alert("⚠️ Address cannot be empty.");
+        return false;
+    }
+
+    return true; // all good
+}
+
 
         // Delete Consumer
         $(document).on("click", ".btn-delete", function () {
